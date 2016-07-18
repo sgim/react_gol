@@ -1,13 +1,6 @@
 import React from "react";
 import Buttons from './Buttons';
 
-
-let isEraser = false;
-let isMousedown = false;
-let isPlaying = false;
-let clearFrame = false;
-let stable = true;
-
 const styles = {
   board: {
     margin: "0 auto",
@@ -36,109 +29,25 @@ const styles = {
   }
 };
 
-class Cell extends React.Component {
-  
-  constructor(key) {
-    super();
-    this.onClick = this.onClick.bind(this);
-    this.state = {
-      style: styles.dead
-    };
-    this.alive = false;
-  }
-
-  onClick() {
-    isPlaying = false;
-    this.setState({
-      style: this.alive ? styles.dead: styles.alive
-    });
-    this.neighbors = 0;
-    this.alive = !this.alive;
-  }
-
-  checkNeighbors() {
-
-  }
-
-  updateStatus() {
-
-  }
-
-  kill() {
-    this.setState({ style: styles.dead });
-    stable = this.alive = false;
-  }
-
-  revive() {
-    this.setState({ style: styles.alive });
-    stable = false;
-    this.alive = true;
-  }
-
-  render() {
-    return (
-      <td style={this.state.style}
-      onClick={this.onClick}></td>
-    );
-  }
-
-};
-
-class Row extends React.Component{
-  constructor() {
-    super();
-  }
-
-  render() {
-    this.cells = [];
-    let cells = this.props.cells;
-    let {row, width} = this.props;
-    for(let w = 0, key; w < width; w++) {
-      key = w + "-" + row;
-      cells.push(<Cell
-        key={key}
-        ></Cell>)
-    }
-    return (
-      <tr style={styles.tr} >
-        {cells}
-      </tr>
-    );
-  }
-};
-
-class Board extends React.Component {
-
-  constructor(){
-    super();
-    this.onClick = this.onClick.bind(this);
-  }
-
-  onClick() {
-    console.log(this);
-  }
-
-  render() {
-    this.rows = [];
-    let {height, width} = this.props;
-    for(let h = 0; h < height; h++) {
-      this.rows.push(<Row key={"row" + h} width={width} row={height} cells={[]}/>);
-    }
-    return <tbody onClick={this.onClick}>{this.rows}</tbody>;
-  }
-};
+const CellStateless = (props, alive) => (
+  <td
+  key={props}
+  style={alive.length ? styles.alive : styles.dead}
+  ></td>
+);
 
 const RowStateless = ({width=20, height=20, cells=[], row=0}) => {
+  const cols = [];
   for(let w = 0; w < width; w++) {
-    cells.push(<Cell key={w+'-'+row} />);
+    cols.push(CellStateless(w+"-"+row, cells[row][w]));
   }
   return (
-    <tr key={"row"+row} style={styles.tr}>{cells}</tr>
+    <tr key={"row"+row} style={styles.tr}>{cols}</tr>
   );
 };
-const BoardStateless = ({width=20, height=20, rows=[]}) => {
+const BoardStateless = ({width=20, height=20, rows=[], cells=[]}) => {
   for(let h = 0; h < height; h++) {
-    rows[h] = (RowStateless({width, height, row: h}));
+    rows[h] = (RowStateless({width, height, row: h, cells}));
   }
   rows = rows.slice(0, height);
   return (
@@ -151,22 +60,85 @@ export default class GameOfLife extends React.Component {
     super();
     this.changeWidth = this.changeWidth.bind(this);
     this.changeHeight = this.changeHeight.bind(this);
+    this.playGame = this.playGame.bind(this);
+    this.pauseGame = this.pauseGame.bind(this);
+    this.setupCells = this.setupCells.bind(this);
+    this.autoPlay = this.autoPlay.bind(this);
     this.state = {
       width: 20,
       height: 20,
-      rows: []
+      rows: [],
+      cells: [],
+      isPlaying: false
     };
+    this.clearFrame = false;
+    this.interval = 27;
+    this.setupCells();
+  }
+  setupCells(e, width=this.state.width, height=this.state.height) {
+    let {cells} = this.state;
+    let h = 0;
+    cells.length = 0;
+    while(h < height) {
+      const row = [];
+      let w = width;
+      // there must be a better way to do this
+      // but this works if I check aliveness with array.length
+      while (w--) {
+        row.push((Math.random() * 100 < 50) ? []: [0]);
+      }
+      cells.push(row);
+      h++;
+    }
+    // only update setState if called from an event
+    // this ensures setState isn't called before component is mounted
+    e && this.setState({cells});
+  }
+  playGame() {
+    let {width, height, cells} = this.state;
+    cells = cells.map((row, i, rows) => {
+      // get count of surrounding neighbors for each cell
+      return row.map((cell, j) => {
+        cell.neighbors = 0;
+        let startRow = i === 0 ? i : i - 1;
+        let endRow = i + 1 === height ? i: i + 1;
+        let startCol = j === 0 ? j : j - 1;
+        let endCol = j + 1 === width ? j : j + 1;
+        for(; startRow <= endRow; startRow++) {
+          for(let col = startCol; col <= endCol; col++) {
+            let neighbor = cells[startRow][col];
+            neighbor.length && (neighbor !== cell) && cell.neighbors++;
+          }
+        }
+        return cell;
+      });
+      // determine whether to keep cell alive or dead depending on neighbor count
+    }).map(row => row.map(cell => {
+      let n = cell.neighbors;
+      let alive = cell.length;
+      if(!alive) {
+        return n === 3 ? [0]: [];
+      }
+      return (n === 3 || n === 2) ? [0]: [];
+    }));
+    this.setState({cells});
+  }
+  autoPlay() {
+    this.state.isPlaying = true;
+    this.clearFrame = setInterval(() => this.playGame(), this.interval);
+  }
+  pauseGame() {
+    this.state.isPlaying = false;
+    clearInterval(this.clearFrame);
+    this.setState({ isPlaying: false });
   }
   changeHeight(e, i, height) {
-    console.log(this);
-    this.setState({
-      height
-    });
+    this.setupCells(false, this.state.width, height);
+    this.setState({ height });
   }
   changeWidth(e, i, width) {
-    this.setState({
-      width
-    });
+    this.setupCells(false, width, this.state.height);
+    this.setState({ width });
   }
   render() {
     return (
@@ -174,7 +146,7 @@ export default class GameOfLife extends React.Component {
       <table style={styles.board}>
         {BoardStateless(this.state)}
       </table>
-      <Buttons settings={this.state} changeWidth={this.changeWidth} changeHeight={this.changeHeight}/>
+      <Buttons options={this} />
       </div>
     );
   }

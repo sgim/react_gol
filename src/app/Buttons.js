@@ -28,7 +28,7 @@ export default class Menu extends React.Component{
     super();
     this.toggleOptions = this.toggleOptions.bind(this);
     this.state = {
-      open: false,
+      open: false
     };
   }
   toggleOptions() {
@@ -36,13 +36,15 @@ export default class Menu extends React.Component{
   }
   // I need to add more style to these buttons
   render() {
-    let {settings: {width, height}, changeWidth, changeHeight} = this.props;
+    let {state: {width, height, isPlaying},
+      changeWidth, autoPlay, changeHeight,
+      pauseGame, playGame, setupCells} = this.props.options;
     return (
     <div>
-    <RaisedButton label="Play"
-      onTouchTap={this.onClick} style={style} />
-    <RaisedButton label="Reset" primary={true} style={style} />
-    <RaisedButton label="Random" secondary={true} style={style} />
+    <RaisedButton label={isPlaying ? "Pause": "Play"}
+      onTouchTap={isPlaying ? pauseGame: autoPlay} style={style} />
+      <RaisedButton label="Step" onTouchTap={playGame} style={style} />
+      <RaisedButton label="Reset" onTouchTap={setupCells} primary={true} style={style} />
     <RaisedButton label="Options"
     secondary={true}
     style={style}
