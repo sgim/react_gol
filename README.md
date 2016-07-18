@@ -4,4 +4,7 @@ It is a React version of Game of Life: http://www.conwaylife.com/wiki/Conway's_G
 
 Width and height can be customized with popout drawer
 
+To install, simply "npm install"
+
+After installation, "npm start"
 
