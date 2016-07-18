@@ -20,7 +20,7 @@ const Board = ({width=20, height=20, cells=[]}) => {
   for(let h = 0; h < height; h++) {
     rows.push(Row({width, height, row: h, cells}));
   }
-  return <tbody>{rows}</tbody>;
+  return <table><tbody>{rows}</tbody></table>;
 };
 
 export default Board;

@@ -7,6 +7,12 @@ body {
   line-height: 20px;
 }
 
+table {
+  margin: 0 auto;
+  padding-top: 10px;
+  border-collapse: collapse;
+}
+
 tr {
   margin: 0;
   padding: 0;
