@@ -2,12 +2,6 @@ import React from "react";
 import Buttons from './Buttons';
 
 
-const boardSettings = {
-  width: 20,
-  height: 20,
-  stepInterval: 27
-};
-
 let isEraser = false;
 let isMousedown = false;
 let isPlaying = false;
@@ -90,87 +84,97 @@ class Cell extends React.Component {
 
 };
 
-const Row = (h) => {
-  const row = [];
-  for(let w = 0, key; w < boardSettings.width; w++) {
-    key = w + "-" + h;
-    row.push(<Cell
-      key={key}
-      ></Cell>)
+class Row extends React.Component{
+  constructor() {
+    super();
+  }
+
+  render() {
+    this.cells = [];
+    let cells = this.props.cells;
+    let {row, width} = this.props;
+    for(let w = 0, key; w < width; w++) {
+      key = w + "-" + row;
+      cells.push(<Cell
+        key={key}
+        ></Cell>)
+    }
+    return (
+      <tr style={styles.tr} >
+        {cells}
+      </tr>
+    );
+  }
+};
+
+class Board extends React.Component {
+
+  constructor(){
+    super();
+    this.onClick = this.onClick.bind(this);
+  }
+
+  onClick() {
+    console.log(this);
+  }
+
+  render() {
+    this.rows = [];
+    let {height, width} = this.props;
+    for(let h = 0; h < height; h++) {
+      this.rows.push(<Row key={"row" + h} width={width} row={height} cells={[]}/>);
+    }
+    return <tbody onClick={this.onClick}>{this.rows}</tbody>;
+  }
+};
+
+const RowStateless = ({width=20, height=20, cells=[], row=0}) => {
+  for(let w = 0; w < width; w++) {
+    cells.push(<Cell key={w+'-'+row} />);
   }
   return (
-    <tr style={styles.tr} key={"row" + h}>
-      {row}
-    </tr>
+    <tr key={"row"+row} style={styles.tr}>{cells}</tr>
   );
 };
-//class Row extends React.Component{
-
-
-  //render() {
-    //const row = [];
-    //let {height, width} = this.props;
-    //for(let w = 0, key; w < width; w++) {
-      //key = w + "-" + height;
-      //row.push(<Cell
-        //key={key}
-        //></Cell>)
-    //}
-    //return (
-      //<tr style={styles.tr} >
-        //{row}
-      //</tr>
-    //);
-  //}
-//};
-
-//class Board extends React.Component {
-
-  //constructor(){
-    //super();
-    //this.onClick = this.onClick.bind(this);
-  //}
-
-  //onClick() {
-    //console.log(this);
-  //}
-
-  //render() {
-    //this.rows = [];
-    //let {height, width} = this.props;
-    //for(let h = 0; h < height; h++) {
-      ////     this.rows.push(<Row key={"row" + h} width={width} height={height}/>);
-      //this.rows.push(Row(h));
-    //}
-    //return <tbody onClick={this.onClick}>{this.rows}</tbody>;
-  //}
-//};
-const Board = () => {
-
-  const rows = [];
-  let {height, width} = boardSettings;
+const BoardStateless = ({width=20, height=20, rows=[]}) => {
   for(let h = 0; h < height; h++) {
-    rows.push(Row(h));
+    rows[h] = (RowStateless({width, height, row: h}));
   }
-  return <tbody>{rows}</tbody>;
+  rows = rows.slice(0, height);
+  return (
+    <tbody>{rows}</tbody>
+  );
 };
-
 
 export default class GameOfLife extends React.Component {
   constructor() {
     super();
-    this.test = this.test.bind(this);
+    this.changeWidth = this.changeWidth.bind(this);
+    this.changeHeight = this.changeHeight.bind(this);
+    this.state = {
+      width: 20,
+      height: 20,
+      rows: []
+    };
   }
-  test(){
+  changeHeight(e, i, height) {
     console.log(this);
+    this.setState({
+      height
+    });
+  }
+  changeWidth(e, i, width) {
+    this.setState({
+      width
+    });
   }
   render() {
     return (
       <div>
       <table style={styles.board}>
-        <Board width={20} height={20}/>
+        {BoardStateless(this.state)}
       </table>
-      <Buttons func={this.test}/>
+      <Buttons settings={this.state} changeWidth={this.changeWidth} changeHeight={this.changeHeight}/>
       </div>
     );
   }
