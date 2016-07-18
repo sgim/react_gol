@@ -41,23 +41,23 @@ export default class Menu extends React.Component{
       pauseGame, playGame, setupCells} = this.props.options;
     return (
     <div>
-    <RaisedButton label={isPlaying ? "Pause": "Play"}
-      onTouchTap={isPlaying ? pauseGame: autoPlay} style={style} />
+      <RaisedButton label={isPlaying ? "Pause": "Play"}
+        onTouchTap={isPlaying ? pauseGame: autoPlay} style={style} />
       <RaisedButton label="Step" onTouchTap={playGame} style={style} />
       <RaisedButton label="Reset" onTouchTap={setupCells} primary={true} style={style} />
-    <RaisedButton label="Options"
-    secondary={true}
-    style={style}
-    onTouchTap={this.toggleOptions}/>
-    <br />
-    <Drawer open={this.state.open}>
-    {Sizes(width, changeWidth, "width")}
-    {Sizes(height, changeHeight, "height")}
-    <RaisedButton label="CLOSE"
-    onTouchTap={this.toggleOptions}
-    primary={true}
-    style={style}/>
-    </Drawer>
+      <RaisedButton label="Options"
+      secondary={true}
+      style={style}
+      onTouchTap={this.toggleOptions}/>
+      <br />
+      <Drawer open={this.state.open} >
+        {Sizes(width, changeWidth, "width")}
+        {Sizes(height, changeHeight, "height")}
+        <RaisedButton label="CLOSE"
+        onTouchTap={this.toggleOptions}
+        primary={true}
+        style={style}/>
+      </Drawer>
     </div>
     )
   }
