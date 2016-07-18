@@ -6,3 +6,24 @@ body {
   font-size: 13px;
   line-height: 20px;
 }
+
+tr {
+  margin: 0;
+  padding: 0;
+}
+
+td {
+  border: 1px solid #ddd;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+[data-status="alive"] {
+  background: blue;
+}
+
+[data-status="dead"] {
+  background: white;
+}
