@@ -9,58 +9,55 @@ const style = {
   textAlign: "center",
 };
 
-export default class Buttons extends React.Component{
+const sizeOptions = (sizes=[10,20,30,40,50]) => sizes.map((size) => (
+  <MenuItem key={size} value={size} primaryText={size} />
+));
+
+const Sizes = (val, func, text) => (
+  <SelectField
+  value={val}
+  onChange={func}
+  floatingLabelText={"set grid "+text}
+  floatingLabelFixed={true}>
+  {sizeOptions()}
+  </SelectField>
+);
+
+export default class Menu extends React.Component{
   constructor() {
     super();
-    this.onClick = this.onClick.bind(this);
-    this.showOptions = this.showOptions.bind(this);
-    this.changeWidth = this.changeWidth.bind(this);
-    this.changeHeight = this.changeHeight.bind(this);
+    this.toggleOptions = this.toggleOptions.bind(this);
     this.state = {
-      open: false,
-      width: 20,
-      height: 20
+      open: false
     };
   }
-  showOptions() {
+  toggleOptions() {
     this.setState({open: !this.state.open});
-  }
-  changeHeight(e, i, height) {
-    this.setState({height});
-  }
-  changeWidth(e, i, width) {
-    this.setState({width});
-  }
-  onClick() {
-    this.props.func();
   }
   // I need to add more style to these buttons
   render() {
+    let {state: {width, height, isPlaying},
+      changeWidth, autoPlay, changeHeight,
+      pauseGame, playGame, setupCells} = this.props.options;
     return (
     <div>
-    <RaisedButton label="Play"
-      onTouchTap={this.onClick} style={style} />
-    <RaisedButton label="Reset" primary={true} style={style} />
-    <RaisedButton label="Random" secondary={true} style={style} />
-    <RaisedButton label="Options"
-    secondary={true}
-    style={style}
-    onTouchTap={this.showOptions}/>
-    <br />
-    <Drawer open={this.state.open}>
-      <MenuItem>Menu Item</MenuItem>
-      <MenuItem>Menu Item 2</MenuItem>
-      <SelectField value={this.state.width} onChange={this.changeWidth}>
-      {[10,20,30,40,50].map((value) => (
-        <MenuItem key={value} value={value} primaryText={value} />
-      ))}
-      </SelectField>
-      <SelectField value={this.state.height} onChange={this.changeHeight}>
-      {[10,20,30,40,50].map((value) => (
-        <MenuItem key={value} value={value} primaryText={value} />
-      ))}
-      </SelectField>
-    </Drawer>
+      <RaisedButton label={isPlaying ? "Pause": "Play"}
+        onTouchTap={isPlaying ? pauseGame: autoPlay} style={style} />
+      <RaisedButton label="Step" onTouchTap={playGame} style={style} />
+      <RaisedButton label="Reset" onTouchTap={setupCells} primary={true} style={style} />
+      <RaisedButton label="Options"
+      secondary={true}
+      style={style}
+      onTouchTap={this.toggleOptions}/>
+      <br />
+      <Drawer open={this.state.open} >
+        {Sizes(width, changeWidth, "width")}
+        {Sizes(height, changeHeight, "height")}
+        <RaisedButton label="CLOSE"
+        onTouchTap={this.toggleOptions}
+        primary={true}
+        style={style}/>
+      </Drawer>
     </div>
     )
   }
